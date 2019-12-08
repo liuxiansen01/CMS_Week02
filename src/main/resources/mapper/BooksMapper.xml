@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liukainan.mapper.BooksMapper">
+	
+	<!-- 查询类型方法 -->
+	<select id="getTypeList" resultType="com.liukainan.pojo.Type">
+		select * from t_type
+	</select>
+	
+	<!-- 删除图书 -->
+	<delete id="deleteBooks" parameterType="com.liukainan.pojo.Books">
+		delete from t_books 
+		<where>
+			bid in 
+			<foreach collection="array" index="index" item="bid" open="(" separator="," close=")">
+				#{bid}
+			</foreach>
+		</where>
+	</delete>
+	
+	<!-- 查询图书列表 -->
+	<select id="getBooksList" resultType="com.liukainan.pojo.Books">
+		select b.*,t.`tname` from t_books b left join t_type t on b.`type_id`=t.`tid`
+		<where>
+			<if test="bname!=null and bname!=''">
+				b.`bname` like concat('%',#{bname},'%')
+			</if>
+			<if test="minSales!=null and maxSales!=null">
+				and b.`sales` between ${minSales} and ${maxSales}
+			</if>
+			<if test="type_id!=null and type_id>0">
+				and t.`tid`=#{type_id}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 将不符合内容要求的记录添加到t_error表中 -->
+	<insert id="insertErrorMsg" parameterType="com.liukainan.pojo.Error_Msg">
+		insert into t_error
+		(eid,error_msg)
+		values
+		(null,#{error_msg})
+	</insert>
+	
+	<!-- 通过类型名称查询类型ID -->
+	<select id="getTypeIdByTname" resultType="com.liukainan.pojo.Type">
+		select tid from t_type 
+		<where>
+			tname=#{tname}
+		</where>
+	</select>
+	
+	<!-- 插入book数据表 -->
+	<insert id="insertBooks" parameterType="com.liukainan.pojo.Books">
+		insert into t_books
+		(bid,bname,sales,phone,type_id)
+		values
+		(null,#{bname},#{sales},#{phone},#{type_id})
+	</insert>
+</mapper>
